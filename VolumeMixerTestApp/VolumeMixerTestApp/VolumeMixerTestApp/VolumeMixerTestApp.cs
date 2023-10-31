@@ -13,8 +13,8 @@ using System.Collections;
 using System.Threading;
 using System.IO.Ports;
 using System.IO;
-using Newtonsoft.Json;
 using System.Diagnostics.Tracing;
+using System.Text.Json;
 
 namespace VolumeMixerTestApp
 {
@@ -24,7 +24,8 @@ namespace VolumeMixerTestApp
         // The path of the current directory
         String CURRENT_FOLDER_PATH = Path.GetDirectoryName(Application.ExecutablePath);
         // The name of the json file where the configuration is saved when closing the app
-        String SAVED_CONFIG_FILE_NAME = "saved_config.json";
+        String SAVED_APPS_FILE_NAME = "saved_apps.json";
+        String SAVED_VOLUMES_FILE_NAME = "saved_volumes.json";
         // The labels of the channels
         String[] CHANNELS = { "CH1", "CH2", "CH3", "CH4" };
         String[] CHANNEL_IDS = { "1", "2", "3", "4" };
@@ -38,6 +39,8 @@ namespace VolumeMixerTestApp
         static ArrayList activatedAudioSessions = new ArrayList();
 
         static String[] channelsToAudioSessionsMappings = {null, null, null, null};
+
+        static float[] channelsToVolumeMappings = { 0, 0, 0, 0 };
 
         public VolumeMixerTestApp()
         {
@@ -121,6 +124,25 @@ namespace VolumeMixerTestApp
         {
 
             Console.WriteLine("Application closed");
+
+            Dictionary<String, String> channelToApp = new Dictionary<String, String>();
+
+            Dictionary<String, float> channelToVolume = new Dictionary<String, float>();
+
+            for (int i = 0; i < CHANNELS.Length; i++) {
+
+                channelToApp.Add(CHANNELS[i], channelsToAudioSessionsMappings[i]);
+
+                channelToVolume.Add(CHANNELS[i], channelsToVolumeMappings[i]);
+            }
+
+            String json = JsonSerializer.Serialize(channelToApp);
+
+            File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME, json);
+
+            json = JsonSerializer.Serialize(channelToVolume);
+
+            File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME, json);
         }
 
         private void channel1DropDown_SelectedIndexChanged(object sender, EventArgs e)
@@ -329,24 +351,28 @@ namespace VolumeMixerTestApp
                     audioSessionPropertiesToControll.volume.MasterVolume = newVolume;
                 }
             }
+
+            int channelId = Array.IndexOf(channelsToAudioSessionsMappings, executableToControll);
+
+            channelsToVolumeMappings[channelId] = newVolume;
         }
 
-        private Dictionary<String, ChannelProperties> loadSavedConfig(String filePath)
-        {
-            Dictionary<String, ChannelProperties> loaded_config = new Dictionary<string, ChannelProperties>();
+        //private Dictionary<String, ChannelProperties> loadSavedConfig(String filePath)
+        //{
+        //    Dictionary<String, ChannelProperties> loaded_config = new Dictionary<string, ChannelProperties>();
 
-            // Check if saved config file exists
-            if (File.Exists(filePath))
-            {
-                // Read the JSON data from the file
-                string json = File.ReadAllText(filePath);
+        //    // Check if saved config file exists
+        //    if (File.Exists(filePath))
+        //    {
+        //        // Read the JSON data from the file
+        //        string json = File.ReadAllText(filePath);
 
-                // Deserialize the data to a dictionary
-                loaded_config = JsonConvert.DeserializeObject<Dictionary<String, ChannelProperties>>(json);
-            }
+        //        // Deserialize the data to a dictionary
+        //        loaded_config = JsonConvert.DeserializeObject<Dictionary<String, ChannelProperties>>(json);
+        //    }
 
-            return loaded_config;
-        }
+        //    return loaded_config;
+        //}
     }
 
     public class AudioSessionProperties

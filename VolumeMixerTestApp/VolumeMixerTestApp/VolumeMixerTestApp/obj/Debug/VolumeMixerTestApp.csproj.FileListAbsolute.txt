@@ -43,3 +43,17 @@ D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestAp
 D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
 D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Threading.Tasks.Extensions.xml
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Buffers.dll
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Json.dll
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Memory.dll
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Numerics.Vectors.dll
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Text.Encodings.Web.dll
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Text.Json.dll
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.ValueTuple.dll
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Buffers.xml
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Json.xml
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Memory.xml
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Numerics.Vectors.xml
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Text.Encodings.Web.xml
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.Text.Json.xml
+D:\Documents\VolumeMixer\VolumeMixerTestApp\VolumeMixerTestApp\VolumeMixerTestApp\bin\Debug\System.ValueTuple.xml
