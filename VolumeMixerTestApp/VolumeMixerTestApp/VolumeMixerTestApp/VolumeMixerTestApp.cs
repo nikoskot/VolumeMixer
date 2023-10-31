@@ -44,8 +44,15 @@ namespace VolumeMixerTestApp
             InitializeComponent();
 
             Console.WriteLine("Initialized");
+
+            this.FormClosing += new FormClosingEventHandler(VolumeMixerTestApp_FormClosing);
         }
 
+        /// <summary>
+        /// This method is called when the application window is loaded.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void VolumeMixerTestApp_Load(object sender, EventArgs e)
         {
             Console.WriteLine("Loaded");
@@ -103,6 +110,17 @@ namespace VolumeMixerTestApp
 
             //    }
             //}
+        }
+
+        /// <summary>
+        /// This method is called when the application window is closed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void VolumeMixerTestApp_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+            Console.WriteLine("Application closed");
         }
 
         private void channel1DropDown_SelectedIndexChanged(object sender, EventArgs e)

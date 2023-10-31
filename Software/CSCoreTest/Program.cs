@@ -5,6 +5,7 @@ using CSCore.CoreAudioAPI;
 using System.IO.Ports;
 using Notifications2;
 using System.Collections;
+using System.Text.Json;
 
 namespace Program;
 
@@ -14,26 +15,43 @@ class Program {
 
     public static void Main() {
 
-        Console.WriteLine("Hello, World!");
+        // Console.WriteLine("Hello, World!");
 
-        Notifications2.Notifications2 notifier = new Notifications2.Notifications2();
+        // Notifications2.Notifications2 notifier = new Notifications2.Notifications2();
 
-        notifier.SetupMediaSessionCallbacks();
+        // notifier.SetupMediaSessionCallbacks();
 
-        MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+        // MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
 
-        MMDevice defaultDev = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-        Console.WriteLine(defaultDev.ToString());
+        // MMDevice defaultDev = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        // Console.WriteLine(defaultDev.ToString());
 
-        foreach (MMDevice dev in enumerator.EnumAudioEndpoints(DataFlow.Render, DeviceState.Active)) {
+        // foreach (MMDevice dev in enumerator.EnumAudioEndpoints(DataFlow.Render, DeviceState.Active)) {
 
-            Console.WriteLine(dev.ToString());
-        }
+        //     Console.WriteLine(dev.ToString());
+        // }
 
-        while(true) {
+        // while(true) {
 
-            // Console.WriteLine(arr.Count);
-        }
+        //     // Console.WriteLine(arr.Count);
+        // }
+
+        Dictionary<String, int> dict = new Dictionary<String, int>();
+
+        dict.Add("key1", 1);
+        dict.Add("key2", 2);
+        dict.Add("key3", 3);
+
+        String json = JsonSerializer.Serialize(dict);
+
+        File.WriteAllText("D:\\Documents\\VolumeMixer\\Software\\CSCoreTest\\output.json", json);
+
+        String read = File.ReadAllText("D:\\Documents\\VolumeMixer\\Software\\CSCoreTest\\output.json");
+
+        Dictionary<String, int> dict2 = JsonSerializer.Deserialize<Dictionary<String, int>>(read);
+
+        Console.WriteLine("ok");
+
     }
 }
 
