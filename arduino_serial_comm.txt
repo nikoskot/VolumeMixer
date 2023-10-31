@@ -1,0 +1,51 @@
+using System;
+using System.IO.Ports;
+
+class Program
+{
+    static SerialPort arduinoPort;
+
+    static void Main(string[] args)
+    {
+        // Set up the SerialPort for the Arduino
+        arduinoPort = new SerialPort("COM3", 9600); // Use the correct COM port and baud rate
+
+        // Subscribe to DataReceived event to listen to Arduino input
+        arduinoPort.DataReceived += ArduinoDataReceived;
+
+        // Open the SerialPort
+        arduinoPort.Open();
+
+        // Main loop to wait for user input
+        while (true)
+        {
+            string userInput = Console.ReadLine();
+
+            // Process user input and call a specific function
+            ProcessUserInput(userInput);
+        }
+    }
+
+    static void ArduinoDataReceived(object sender, SerialDataReceivedEventArgs e)
+    {
+        // Read data from the Arduino
+        string arduinoData = arduinoPort.ReadLine();
+
+        // Process Arduino input and call a specific function
+        ProcessArduinoInput(arduinoData);
+    }
+
+    static void ProcessUserInput(string userInput)
+    {
+        // Implement your logic here based on user input
+        Console.WriteLine("User Input: " + userInput);
+        // Call your specific function here
+    }
+
+    static void ProcessArduinoInput(string arduinoData)
+    {
+        // Implement your logic here based on Arduino input
+        Console.WriteLine("Arduino Input: " + arduinoData);
+        // Call your specific function here
+    }
+}
