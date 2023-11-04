@@ -89,30 +89,38 @@ namespace VolumeMixerTestApp
 
 
             // Load saved configuration from file
-            //Dictionary<String, ChannelProperties> loaded_config = loadSavedConfig(CURRENT_FOLDER_PATH + SAVED_CONFIG_FILE_NAME);
-            //// If loaded configuration is not empty, activate the configuration
-            //if (loaded_config.Count >= 1) {
+            String read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME);
+            Dictionary<String, String> channelToApp = JsonSerializer.Deserialize<Dictionary<String, String>>(read);
 
-            //    // Get the executables of the available audio sessions
-            //    ArrayList availableAudioSessionsExecutables = new ArrayList();
-            //    foreach (AudioSessionControl session in availableAudioSessions) {
+            read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME);
+            Dictionary<String, float> channelToVolume = JsonSerializer.Deserialize<Dictionary<String, float>>(read);
 
-            //        AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
-            //        Process proc = session2.Process;
-            //        String executable = proc.MainModule.ModuleName;
+            // If loaded configuration is not empty, activate the configuration
+            if (channelToApp.Count >= 1 && channelToVolume.Count >= 1 && channelToVolume.Count == channelToApp.Count)
+            {
 
-            //        availableAudioSessionsExecutables.Add(executable);
-            //    }
+                // Get the executables of the available audio sessions
+                ArrayList availableAudioSessionsExecutables = new ArrayList();
+                foreach (AudioSessionControl session in availableAudioSessions)
+                {
 
-            //    foreach (String channel in CHANNELS) {
+                    AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
+                    Process proc = session2.Process;
+                    String executable = proc.MainModule.ModuleName;
 
-            //        String executable = loaded_config[channel].executable;
-            //        float volume = loaded_config[channel].volume;
+                    availableAudioSessionsExecutables.Add(executable);
+                }
 
-            //        ///////
+                foreach (String channel in CHANNELS)
+                {
 
-            //    }
-            //}
+                    String executable = loaded_config[channel].executable;
+                    float volume = loaded_config[channel].volume;
+
+                    ///////
+
+                }
+            }
         }
 
         /// <summary>
@@ -131,9 +139,12 @@ namespace VolumeMixerTestApp
 
             for (int i = 0; i < CHANNELS.Length; i++) {
 
-                channelToApp.Add(CHANNELS[i], channelsToAudioSessionsMappings[i]);
+                if (channelsToAudioSessionsMappings[i] != null) {
 
-                channelToVolume.Add(CHANNELS[i], channelsToVolumeMappings[i]);
+                    channelToApp.Add(CHANNELS[i], channelsToAudioSessionsMappings[i]);
+
+                    channelToVolume.Add(CHANNELS[i], channelsToVolumeMappings[i]);
+                }
             }
 
             String json = JsonSerializer.Serialize(channelToApp);
