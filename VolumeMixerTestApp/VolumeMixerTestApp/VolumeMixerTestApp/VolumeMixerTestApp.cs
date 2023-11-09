@@ -23,12 +23,15 @@ namespace VolumeMixerTestApp
     {
         // The path of the current directory
         String CURRENT_FOLDER_PATH = Path.GetDirectoryName(Application.ExecutablePath);
-        // The name of the json file where the configuration is saved when closing the app
+
+        // The name of the json files where the configuration is saved when closing the app
         String SAVED_APPS_FILE_NAME = "saved_apps.json";
         String SAVED_VOLUMES_FILE_NAME = "saved_volumes.json";
+
         // The labels of the channels
         String[] CHANNELS = { "CH1", "CH2", "CH3", "CH4" };
         String[] CHANNEL_IDS = { "1", "2", "3", "4" };
+        const int CHANNELS_NUM = 4;
 
         static SerialPort arduinoPort;
 
@@ -42,12 +45,17 @@ namespace VolumeMixerTestApp
 
         static float[] channelsToVolumeMappings = { 0, 0, 0, 0 };
 
+        static List<AudioApplication> audioApplications = new List<AudioApplication>();
+
+        AudioChannel[] audioChannels = new AudioChannel[CHANNELS_NUM];
+
         public VolumeMixerTestApp()
         {
             InitializeComponent();
 
             Console.WriteLine("Initialized");
 
+            // Set a callback for when the user closes the application
             this.FormClosing += new FormClosingEventHandler(VolumeMixerTestApp_FormClosing);
         }
 
@@ -115,7 +123,7 @@ namespace VolumeMixerTestApp
                 {
 
                     String executable = loaded_config[channel].executable;
-                    float volume = loaded_config[channel].volume;
+                    float volume = channelToVolume[channel];
 
                     ///////
 
@@ -133,15 +141,16 @@ namespace VolumeMixerTestApp
 
             Console.WriteLine("Application closed");
 
+            // Create two dictionaries that will be  saved in two json files
             Dictionary<String, String> channelToApp = new Dictionary<String, String>();
-
             Dictionary<String, float> channelToVolume = new Dictionary<String, float>();
 
-            for (int i = 0; i < CHANNELS.Length; i++) {
+            // For each aduio channel
+            for (int i = 0; i < CHANNELS_NUM; i++) {
 
-                if (channelsToAudioSessionsMappings[i] != null) {
+                if (audioChannels[i] != null) {
 
-                    channelToApp.Add(CHANNELS[i], channelsToAudioSessionsMappings[i]);
+                    channelToApp.Add(CHANNELS[i], audioChannels[i].get);
 
                     channelToVolume.Add(CHANNELS[i], channelsToVolumeMappings[i]);
                 }

@@ -120,6 +120,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioApplication.cs" />
+    <Compile Include="AudioChannel.cs" />
     <Compile Include="Notifications.cs" />
     <Compile Include="VolumeMixerTestApp.cs">
       <SubType>Form</SubType>
