@@ -135,7 +135,7 @@ namespace VolumeMixerTestApp
         }
 
         /// <summary>
-        /// This method is called when the application window is closed.
+        /// This method is called when the application window is closed. It saves the channel-audioApp-volume configuration to two json files.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -153,6 +153,7 @@ namespace VolumeMixerTestApp
 
                 if (audioChannels[i] != null) {
 
+                    // Add the 
                     channelToApp.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getExecutable());
 
                     channelToVolume.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getVolume().MasterVolume);

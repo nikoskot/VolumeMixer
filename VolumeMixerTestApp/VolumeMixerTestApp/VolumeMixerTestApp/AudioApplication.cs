@@ -32,6 +32,16 @@ namespace VolumeMixerTestApp
 
         public AudioEndpointVolume getMasterVolume() { return masterVolume; }
 
+        public float getVolumeValue() {
+
+            float volume = 0;
+
+            if (this.volume != null && this.masterVolume == null) { volume = this.volume.MasterVolume; }
+            else if (this.volume == null && this.masterVolume != null) { volume = masterVolume.MasterVolumeLevelScalar; }
+
+            return volume;
+        }
+
         public Process getProcess() { return process; }
 
         public String getExecutable() { return executable; }
@@ -82,7 +92,7 @@ namespace VolumeMixerTestApp
             {
 
                 if (this.volume != null && this.masterVolume == null) { this.volume.MasterVolume = volume; }
-                else if (this.volume == null && this.masterVolume != null) { masterVolume.MasterVolumeLevelScalar = volume;  }
+                else if (this.volume == null && this.masterVolume != null) { masterVolume.MasterVolumeLevelScalar = volume; }
             }
         }
 
