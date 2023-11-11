@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Security.Permissions;
 using System.Text;
@@ -16,6 +17,8 @@ namespace VolumeMixerTestApp
 
         AudioSessionControl session;
         AudioSessionControl2 session2;
+        SimpleAudioVolume volume;
+        AudioEndpointVolume masterVolume;
         Process process;
         String executable;
         AudioChannel channel;
@@ -24,6 +27,10 @@ namespace VolumeMixerTestApp
         public AudioSessionControl getSession() { return session; }
 
         public AudioSessionControl2 getSession2() { return session2; }
+
+        public SimpleAudioVolume getVolume() { return volume; }
+
+        public AudioEndpointVolume getMasterVolume() { return masterVolume; }
 
         public Process getProcess() { return process; }
 
@@ -45,6 +52,37 @@ namespace VolumeMixerTestApp
             if (session2 != null) {
 
                 this.session2 = session2;
+            }
+        }
+
+        public void setVolume(SimpleAudioVolume volume)
+        {
+
+            if (volume != null)
+            {
+
+                this.volume = volume;
+            }
+        }
+
+        public void setVolume(AudioEndpointVolume masterVolume)
+        {
+
+            if (masterVolume != null)
+            {
+
+                this.masterVolume = masterVolume;
+            }
+        }
+
+        public void setVolume(float volume)
+        {
+
+            if (volume >= 0 && volume <= 1f)
+            {
+
+                if (this.volume != null && this.masterVolume == null) { this.volume.MasterVolume = volume; }
+                else if (this.volume == null && this.masterVolume != null) { masterVolume.MasterVolumeLevelScalar = volume;  }
             }
         }
 
@@ -77,6 +115,7 @@ namespace VolumeMixerTestApp
 
             setSession(session);
             setSession2(session.QueryInterface<AudioSessionControl2>());
+            setVolume(session.QueryInterface<SimpleAudioVolume>());
             setProcess(this.session2.Process);
 
             try {
@@ -85,7 +124,7 @@ namespace VolumeMixerTestApp
                 this.process.EnableRaisingEvents = true;
                 this.process.Exited += (sender, e) => {
                     Console.WriteLine("Session Disconnected");
-                    VolumeMixerTestApp.availableAudioSessionsProperties = VolumeMixerTestApp.CollectAvailableAudioSessionsProperties();
+                    VolumeMixerTestApp.CollectAvailableAudioApplications();
                 };
             }
 

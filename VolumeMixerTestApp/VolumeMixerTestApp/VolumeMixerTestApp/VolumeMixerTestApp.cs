@@ -15,6 +15,7 @@ using System.IO.Ports;
 using System.IO;
 using System.Diagnostics.Tracing;
 using System.Text.Json;
+using static System.Collections.Specialized.BitVector32;
 
 namespace VolumeMixerTestApp
 {
@@ -45,9 +46,11 @@ namespace VolumeMixerTestApp
 
         static float[] channelsToVolumeMappings = { 0, 0, 0, 0 };
 
-        static List<AudioApplication> audioApplications = new List<AudioApplication>();
+        // This list holds the currently available running applications/sessions that use audio.
+        static List<AudioApplication> availableAudioApplications = new List<AudioApplication>();
 
-        AudioChannel[] audioChannels = new AudioChannel[CHANNELS_NUM];
+        // This array holds the available audio channels.
+        static AudioChannel[] audioChannels = new AudioChannel[CHANNELS_NUM];
 
         public VolumeMixerTestApp()
         {
@@ -68,67 +71,67 @@ namespace VolumeMixerTestApp
         {
             Console.WriteLine("Loaded");
 
+            //////////////////////////////////////////////////////////////////////////////////////////
             // Arduino setup
             // Set up the SerialPort for the Arduino
             arduinoPort = new SerialPort("COM4", 9600); // Use the correct COM port and baud rate
+
             // Subscribe to DataReceived event to listen to Arduino input
             arduinoPort.DataReceived += ArduinoDataReceived;
+
             // Open the SerialPort
             arduinoPort.Open();
-            MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+            //////////////////////////////////////////////////////////////////////////////////////////
 
-            Notifications notifier = new Notifications();
-
-            notifier.SetupAudioSessionNotificationCallbacks();
-
-            // Get available audio sessions
-
-            // Upon initialization get the available audio sessions (properties)
-            Thread t = new Thread(new ThreadStart(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
-                /* run your code here */
-                Console.WriteLine("Thread running");
-                availableAudioSessionsProperties = CollectAvailableAudioSessionsProperties();
-            }));
-            t.Start();
-            t.Join();
-            Console.WriteLine("Thread finished");
-
-
-            // Load saved configuration from file
-            String read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME);
-            Dictionary<String, String> channelToApp = JsonSerializer.Deserialize<Dictionary<String, String>>(read);
-
-            read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME);
-            Dictionary<String, float> channelToVolume = JsonSerializer.Deserialize<Dictionary<String, float>>(read);
-
-            // If loaded configuration is not empty, activate the configuration
-            if (channelToApp.Count >= 1 && channelToVolume.Count >= 1 && channelToVolume.Count == channelToApp.Count)
-            {
-
-                // Get the executables of the available audio sessions
-                ArrayList availableAudioSessionsExecutables = new ArrayList();
-                foreach (AudioSessionControl session in availableAudioSessions)
-                {
-
-                    AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
-                    Process proc = session2.Process;
-                    String executable = proc.MainModule.ModuleName;
-
-                    availableAudioSessionsExecutables.Add(executable);
-                }
-
-                foreach (String channel in CHANNELS)
-                {
-
-                    String executable = loaded_config[channel].executable;
-                    float volume = channelToVolume[channel];
-
-                    ///////
-
-                }
+            for (int i = 0; i < CHANNELS_NUM; i++) {
+                audioChannels[i] = new AudioChannel();
             }
+
+            /////////////////////////////////////////////////////////////////////////////////////////
+            // Setup notifications-callbacks for when a new audio session is created.
+            Notifications notifier = new Notifications();
+            notifier.SetupAudioSessionNotificationCallbacks();
+            /////////////////////////////////////////////////////////////////////////////////////////
+
+            // Upon initialization get the available audio applications/sessions
+            GetAvailableAudioApplications();
+
+            /////////////////////////////////////////////////////////////////////////////////////////
+            // Load saved configuration from file
+            //String read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME);
+            //Dictionary<String, String> channelToApp = JsonSerializer.Deserialize<Dictionary<String, String>>(read);
+
+            //read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME);
+            //Dictionary<String, float> channelToVolume = JsonSerializer.Deserialize<Dictionary<String, float>>(read);
+
+            //// If loaded configuration is not empty, activate the configuration
+            //if (channelToApp.Count >= 1 && channelToVolume.Count >= 1 && channelToVolume.Count == channelToApp.Count)
+            //{
+
+            //    // Get the executables of the available audio sessions
+            //    ArrayList availableAudioSessionsExecutables = new ArrayList();
+            //    foreach (AudioSessionControl session in availableAudioSessions)
+            //    {
+
+            //        AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
+            //        Process proc = session2.Process;
+            //        String executable = proc.MainModule.ModuleName;
+
+            //        availableAudioSessionsExecutables.Add(executable);
+            //    }
+
+            //    foreach (String channel in CHANNELS)
+            //    {
+
+            //        String executable = loaded_config[channel].executable;
+            //        float volume = channelToVolume[channel];
+
+            //        ///////
+
+            //    }
+            //}
+            /////////////////////////////////////////////////////////////////////////////////////////
+            
         }
 
         /// <summary>
@@ -150,9 +153,9 @@ namespace VolumeMixerTestApp
 
                 if (audioChannels[i] != null) {
 
-                    channelToApp.Add(CHANNELS[i], audioChannels[i].get);
+                    channelToApp.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getExecutable());
 
-                    channelToVolume.Add(CHANNELS[i], channelsToVolumeMappings[i]);
+                    channelToVolume.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getVolume().MasterVolume);
                 }
             }
 
@@ -167,7 +170,7 @@ namespace VolumeMixerTestApp
 
         private void channel1DropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            channelsToAudioSessionsMappings[0] = channel1DropDown.SelectedItem.ToString();
+            audioChannels[0].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
         }
 
         private void channel1DropDown_DropDown(object sender, EventArgs e)
@@ -175,17 +178,16 @@ namespace VolumeMixerTestApp
             // Clear the current item list
             channel1DropDown.Items.Clear();
 
-            // Add the available audio sessions executables to the dropdown lists
+            // Add the available audio application executables to the dropdown lists
+            // Create an empty list.
             ArrayList availableAudioSessionsExecutables = new ArrayList();
 
-            availableAudioSessionsExecutables.Add("Master Volume");
-
-            // For each audio session property entity available
-            foreach (AudioSessionProperties audioSessionProp in availableAudioSessionsProperties)
+            // For each audio application available
+            foreach (AudioApplication audioApp in availableAudioApplications)
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioSessionProp.executable);
+                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
             }
             
             // Add the executables list to the drop down list
@@ -194,7 +196,7 @@ namespace VolumeMixerTestApp
 
         private void channel2DropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            channelsToAudioSessionsMappings[1] = channel2DropDown.SelectedItem.ToString();
+            audioChannels[1].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
         }
 
         private void channel2DropDown_DropDown(object sender, EventArgs e)
@@ -202,17 +204,16 @@ namespace VolumeMixerTestApp
             // Clear the current item list
             channel2DropDown.Items.Clear();
 
-            // Add the available audio sessions executables to the dropdown lists
+            // Add the available audio application executables to the dropdown lists
+            // Create an empty list.
             ArrayList availableAudioSessionsExecutables = new ArrayList();
 
-            availableAudioSessionsExecutables.Add("Master Volume");
-
-            // For each audio session property entity available
-            foreach (AudioSessionProperties audioSessionProp in availableAudioSessionsProperties)
+            // For each audio application available
+            foreach (AudioApplication audioApp in availableAudioApplications)
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioSessionProp.executable);
+                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
             }
 
             // Add the executables list to the drop down list
@@ -221,7 +222,7 @@ namespace VolumeMixerTestApp
 
         private void channel3DropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            channelsToAudioSessionsMappings[2] = channel3DropDown.SelectedItem.ToString();
+            audioChannels[2].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
         }
 
         private void channel3DropDown_DropDown(object sender, EventArgs e)
@@ -229,17 +230,16 @@ namespace VolumeMixerTestApp
             // Clear the current item list
             channel3DropDown.Items.Clear();
 
-            // Add the available audio sessions executables to the dropdown lists
+            // Add the available audio application executables to the dropdown lists
+            // Create an empty list.
             ArrayList availableAudioSessionsExecutables = new ArrayList();
 
-            availableAudioSessionsExecutables.Add("Master Volume");
-
-            // For each audio session property entity available
-            foreach (AudioSessionProperties audioSessionProp in availableAudioSessionsProperties)
+            // For each audio application available
+            foreach (AudioApplication audioApp in availableAudioApplications)
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioSessionProp.executable);
+                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
             }
 
             // Add the executables list to the drop down list
@@ -248,7 +248,7 @@ namespace VolumeMixerTestApp
 
         private void channel4DropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            channelsToAudioSessionsMappings[3] = channel4DropDown.SelectedItem.ToString();
+            audioChannels[3].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
         }
 
         private void channel4DropDown_DropDown(object sender, EventArgs e)
@@ -256,17 +256,16 @@ namespace VolumeMixerTestApp
             // Clear the current item list
             channel4DropDown.Items.Clear();
 
-            // Add the available audio sessions executables to the dropdown lists
+            // Add the available audio application executables to the dropdown lists
+            // Create an empty list.
             ArrayList availableAudioSessionsExecutables = new ArrayList();
 
-            availableAudioSessionsExecutables.Add("Master Volume");
-
-            // For each audio session property entity available
-            foreach (AudioSessionProperties audioSessionProp in availableAudioSessionsProperties)
+            // For each audio application available
+            foreach (AudioApplication audioApp in availableAudioApplications)
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioSessionProp.executable);
+                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
             }
 
             // Add the executables list to the drop down list
@@ -276,9 +275,67 @@ namespace VolumeMixerTestApp
         private void button1_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Clicked apply");
+            if (channel1DropDown.SelectedIndex > 0) {
+
+                audioChannels[0].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
+            }
+            else {
+                audioChannels[0].setAudioApplication(new AudioApplication());
+            }
+
+            if (channel2DropDown.SelectedIndex > 0)
+            {
+
+                audioChannels[1].setAudioApplication(GetAudioApplicationFromExecutable(channel2DropDown.SelectedItem.ToString()));
+            }
+            else
+            {
+                audioChannels[1].setAudioApplication(new AudioApplication());
+            }
+
+            if (channel3DropDown.SelectedIndex > 0)
+            {
+
+                audioChannels[2].setAudioApplication(GetAudioApplicationFromExecutable(channel3DropDown.SelectedItem.ToString()));
+            }
+            else
+            {
+                audioChannels[2].setAudioApplication(new AudioApplication());
+            }
+
+            if (channel4DropDown.SelectedIndex > 0)
+            {
+
+                audioChannels[3].setAudioApplication(GetAudioApplicationFromExecutable(channel4DropDown.SelectedItem.ToString()));
+            }
+            else
+            {
+                audioChannels[3].setAudioApplication(new AudioApplication());
+            }
         }
 
-        static public ArrayList CollectAvailableAudioSessionsProperties() {
+        /// <summary>
+        /// This method is called when we want to get all the available audio applications/sessions that are currently running is the system.
+        /// </summary>
+        public void GetAvailableAudioApplications() {
+
+            Thread t = new Thread(new ThreadStart(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                /* run your code here */
+                Console.WriteLine("Thread running");
+                CollectAvailableAudioApplications();
+            }));
+            t.Start();
+            t.Join();
+            Console.WriteLine("Thread finished");
+        }
+
+        /// <summary>
+        /// This method finds and collects all the available audio applications/sessions that are currently running is the system. 
+        /// They are saved in the corresponding list.
+        /// </summary>
+        static public void CollectAvailableAudioApplications() {
 
             // Get the device enumerator, the audio device and the session manager of the device
             MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
@@ -288,48 +345,61 @@ namespace VolumeMixerTestApp
             // Get the audio session enumerator
             AudioSessionEnumerator sessionEnumerator = sessionManager.GetSessionEnumerator();
 
-            // Initialize the list of the audio sessions properties objects
-            ArrayList audioSessionsProperties = new ArrayList();
+            // Clear the list with the currently available audio applications/sessions
+            availableAudioApplications.Clear();
+
+            // Add manualy the System Master Volume.
+            // Create an Audio Apllication object for the System Master Volume
+            AudioApplication masterVolumeApplication = new AudioApplication();
+            masterVolumeApplication.setExecutable("Master Volume");
+            masterVolumeApplication.setVolume(AudioEndpointVolume.FromDevice(device));
+
+            // Add it to the list
+            availableAudioApplications.Add(masterVolumeApplication);
 
             // For each audio session in the audio session enumerator
             foreach (AudioSessionControl session in sessionEnumerator) {
 
-                // Create the corresponding audio session properties object
-                AudioSessionProperties audioSessionProp = new AudioSessionProperties(session);
+                // Create the corresponding audio application object
+                AudioApplication audioApplication = new AudioApplication(session);
 
                 // If it is not the system.exe and has a valid executable name
-                if (audioSessionProp.executable != null & audioSessionProp.executable != "system.exe")
+                if (audioApplication.getExecutable() != null & audioApplication.getExecutable() != "system.exe")
                 {
 
                     // Add it to the list
-                    audioSessionsProperties.Add(audioSessionProp);
+                    availableAudioApplications.Add(audioApplication);
                 }    
             }
-
-            return audioSessionsProperties;
         }
 
-        static private AudioSessionProperties GetAudioSessionPropertyFromExecutable(string executable) {
+        static private AudioApplication GetAudioApplicationFromExecutable(string executable) {
+            AudioApplication audioApp = null;
 
-            AudioSessionProperties prop = null;
+            foreach (AudioApplication audioApplication in availableAudioApplications)
+            {
 
-            foreach (AudioSessionProperties audioSessionProperties in availableAudioSessionsProperties) {
+                if (audioApplication.getExecutable() == executable)
+                {
 
-                if (audioSessionProperties.executable == executable) {
-
-                    prop = audioSessionProperties;
+                    audioApp = audioApplication;
                 }
             }
 
-            return prop;
+            return audioApp;
         }
 
+        /// <summary>
+        /// This method is called when the app receives a new message from the mixer board.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         static void ArduinoDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             // Read data from the Arduino
             string arduinoData = arduinoPort.ReadLine();
 
-            // Process Arduino input and call a specific function
+            // Decompose the message and get the channel id and the new volume number
             Console.WriteLine(arduinoData);
 
             String[] data = arduinoData.Split('_');
@@ -338,43 +408,8 @@ namespace VolumeMixerTestApp
 
             float newVolume = float.Parse(data[1]);
 
-            AudioSessionProperties audioSessionPropertiesToControll;
-
-            //// Change the audio device volume, set it to 75%
-            //MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
-            //MMDevice device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-
-            //AudioEndpointVolume endpointVol = AudioEndpointVolume.FromDevice(device);
-            ////float masterVolume = endpointVol.GetMasterVolumeLevelScalar();
-            //endpointVol.MasterVolumeLevelScalar = newVolume;
-
-            String executableToControll = channelsToAudioSessionsMappings[channelNumber - 1];
-
-            if (executableToControll == "Master Volume") {
-
-                audioSessionPropertiesToControll = new AudioSessionProperties();
-
-                audioSessionPropertiesToControll.executable = "Master Volume";
-
-                MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
-                MMDevice device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-                AudioEndpointVolume endpointVol = AudioEndpointVolume.FromDevice(device);
-
-                endpointVol.MasterVolumeLevelScalar = newVolume;
-            }
-            else if (executableToControll != null) {
-
-                audioSessionPropertiesToControll = GetAudioSessionPropertyFromExecutable(executableToControll);
-
-                if (audioSessionPropertiesToControll != null)
-                {
-                    audioSessionPropertiesToControll.volume.MasterVolume = newVolume;
-                }
-            }
-
-            int channelId = Array.IndexOf(channelsToAudioSessionsMappings, executableToControll);
-
-            channelsToVolumeMappings[channelId] = newVolume;
+            // Change the channel volume
+            audioChannels[channelNumber - 1].getAudioApplication().setVolume(newVolume);
         }
 
         //private Dictionary<String, ChannelProperties> loadSavedConfig(String filePath)
@@ -393,66 +428,5 @@ namespace VolumeMixerTestApp
 
         //    return loaded_config;
         //}
-    }
-
-    public class AudioSessionProperties
-    {
-
-        public AudioSessionControl session { get; set; }
-        public AudioSessionControl2 session2 { get; set; }
-        public SimpleAudioVolume volume { get; set; }
-        public Process process { get; set; }
-        public String executable { get; set; }
-
-        public AudioSessionProperties(AudioSessionControl session)
-        {
-            this.session = session;
-            this.session2 = session.QueryInterface<AudioSessionControl2>();
-            this.volume = session.QueryInterface<SimpleAudioVolume>();
-            this.process = this.session2.Process;
-            
-            try
-            {
-                // Set up the handler for when the process will be terminated
-                this.process.EnableRaisingEvents = true;
-                this.process.Exited += (sender, e) => { Console.WriteLine("Session Disconnected");
-                                                        VolumeMixerTestApp.availableAudioSessionsProperties = VolumeMixerTestApp.CollectAvailableAudioSessionsProperties();
-                                                      };
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            try
-            {
-                this.executable = this.process.MainModule.ModuleName;
-            }
-
-            catch (Exception ex)
-            {
-                if (this.process.ProcessName == "Idle")
-                {
-                    // Systems sounds (this we will ignore)
-                    executable = "system.exe";
-                }
-            }
-        }
-
-        public AudioSessionProperties()
-        {
-            this.session = null;
-            this.session2 = null;
-            this.volume = null;
-            this.process = null;
-            this.executable = null;
-        }
-    }
-
-    public class ChannelProperties
-    {
-
-        public string executable { get; set; }
-        public float volume { get; set; }
     }
 }

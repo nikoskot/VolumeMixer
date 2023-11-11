@@ -49,7 +49,6 @@
             this.channel1DropDown.Size = new System.Drawing.Size(121, 21);
             this.channel1DropDown.TabIndex = 5;
             this.channel1DropDown.DropDown += new System.EventHandler(this.channel1DropDown_DropDown);
-            this.channel1DropDown.SelectedIndexChanged += new System.EventHandler(this.channel1DropDown_SelectedIndexChanged);
             // 
             // channel2DropDown
             // 
@@ -60,7 +59,6 @@
             this.channel2DropDown.Size = new System.Drawing.Size(121, 21);
             this.channel2DropDown.TabIndex = 6;
             this.channel2DropDown.DropDown += new System.EventHandler(this.channel2DropDown_DropDown);
-            this.channel2DropDown.SelectedIndexChanged += new System.EventHandler(this.channel2DropDown_SelectedIndexChanged);
             // 
             // channel3DropDown
             // 
@@ -71,7 +69,6 @@
             this.channel3DropDown.Size = new System.Drawing.Size(121, 21);
             this.channel3DropDown.TabIndex = 7;
             this.channel3DropDown.DropDown += new System.EventHandler(this.channel3DropDown_DropDown);
-            this.channel3DropDown.SelectedIndexChanged += new System.EventHandler(this.channel3DropDown_SelectedIndexChanged);
             // 
             // channel4DropDown
             // 
@@ -82,7 +79,6 @@
             this.channel4DropDown.Size = new System.Drawing.Size(121, 21);
             this.channel4DropDown.TabIndex = 8;
             this.channel4DropDown.DropDown += new System.EventHandler(this.channel4DropDown_DropDown);
-            this.channel4DropDown.SelectedIndexChanged += new System.EventHandler(this.channel4DropDown_SelectedIndexChanged);
             // 
             // label1
             // 

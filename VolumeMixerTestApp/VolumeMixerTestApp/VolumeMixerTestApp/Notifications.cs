@@ -42,7 +42,8 @@ namespace VolumeMixerTestApp
                 Console.WriteLine("New session created");
 
                 // Get the available audio sessions and audio session properties and save them to the corresponding list of the main application
-                VolumeMixerTestApp.availableAudioSessionsProperties = VolumeMixerTestApp.CollectAvailableAudioSessionsProperties();
+                //VolumeMixerTestApp.availableAudioSessionsProperties = VolumeMixerTestApp.CollectAvailableAudioSessionsProperties();
+                VolumeMixerTestApp.CollectAvailableAudioApplications();
                 return 0;
             }
         }
