@@ -41,6 +41,9 @@ namespace VolumeMixerTestApp
         // This array holds the available audio channels.
         static AudioChannel[] audioChannels = new AudioChannel[CHANNELS_NUM];
 
+        // This array holds the objects of the UI Comboboxes
+        static ComboBox[] channelDropDownComboBoxes = new ComboBox[CHANNELS_NUM];
+
         public VolumeMixerTestApp()
         {
             InitializeComponent();
@@ -72,9 +75,16 @@ namespace VolumeMixerTestApp
             arduinoPort.Open();
             //////////////////////////////////////////////////////////////////////////////////////////
 
+            // Initialize the array that holds the audio channels.
             for (int i = 0; i < CHANNELS_NUM; i++) {
                 audioChannels[i] = new AudioChannel();
             }
+
+            // Initialize the array that holds the UI Comboboxes
+            channelDropDownComboBoxes[0] = channel1DropDown;
+            channelDropDownComboBoxes[1] = channel2DropDown;
+            channelDropDownComboBoxes[2] = channel3DropDown;
+            channelDropDownComboBoxes[3] = channel4DropDown;
 
             /////////////////////////////////////////////////////////////////////////////////////////
             // Setup notifications-callbacks for when a new audio session is created.
@@ -129,7 +139,6 @@ namespace VolumeMixerTestApp
                 }
             }
             /////////////////////////////////////////////////////////////////////////////////////////
-
         }
 
         /// <summary>
@@ -169,10 +178,10 @@ namespace VolumeMixerTestApp
             File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME, json);
         }
 
-        private void channel1DropDown_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            audioChannels[0].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
-        }
+        //private void channel1DropDown_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    audioChannels[0].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
+        //}
 
         private void channel1DropDown_DropDown(object sender, EventArgs e)
         {
@@ -195,10 +204,10 @@ namespace VolumeMixerTestApp
             channel1DropDown.Items.AddRange(availableAudioSessionsExecutables.ToArray());
         }
 
-        private void channel2DropDown_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            audioChannels[1].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
-        }
+        //private void channel2DropDown_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    audioChannels[1].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
+        //}
 
         private void channel2DropDown_DropDown(object sender, EventArgs e)
         {
@@ -221,10 +230,10 @@ namespace VolumeMixerTestApp
             channel2DropDown.Items.AddRange(availableAudioSessionsExecutables.ToArray());
         }
 
-        private void channel3DropDown_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            audioChannels[2].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
-        }
+        //private void channel3DropDown_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    audioChannels[2].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
+        //}
 
         private void channel3DropDown_DropDown(object sender, EventArgs e)
         {
@@ -247,10 +256,10 @@ namespace VolumeMixerTestApp
             channel3DropDown.Items.AddRange(availableAudioSessionsExecutables.ToArray());
         }
 
-        private void channel4DropDown_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            audioChannels[3].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
-        }
+        //private void channel4DropDown_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    audioChannels[3].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
+        //}
 
         private void channel4DropDown_DropDown(object sender, EventArgs e)
         {
@@ -276,42 +285,17 @@ namespace VolumeMixerTestApp
         private void button1_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Clicked apply");
-            if (channel1DropDown.SelectedIndex > 0) {
+            for (int i = 0; i < CHANNELS_NUM; i++) {
 
-                audioChannels[0].setAudioApplication(GetAudioApplicationFromExecutable(channel1DropDown.SelectedItem.ToString()));
-            }
-            else {
-                audioChannels[0].setAudioApplication(new AudioApplication());
-            }
+                if (channelDropDownComboBoxes[i].SelectedIndex > 0)
+                {
 
-            if (channel2DropDown.SelectedIndex > 0)
-            {
-
-                audioChannels[1].setAudioApplication(GetAudioApplicationFromExecutable(channel2DropDown.SelectedItem.ToString()));
-            }
-            else
-            {
-                audioChannels[1].setAudioApplication(new AudioApplication());
-            }
-
-            if (channel3DropDown.SelectedIndex > 0)
-            {
-
-                audioChannels[2].setAudioApplication(GetAudioApplicationFromExecutable(channel3DropDown.SelectedItem.ToString()));
-            }
-            else
-            {
-                audioChannels[2].setAudioApplication(new AudioApplication());
-            }
-
-            if (channel4DropDown.SelectedIndex > 0)
-            {
-
-                audioChannels[3].setAudioApplication(GetAudioApplicationFromExecutable(channel4DropDown.SelectedItem.ToString()));
-            }
-            else
-            {
-                audioChannels[3].setAudioApplication(new AudioApplication());
+                    audioChannels[i].setAudioApplication(GetAudioApplicationFromExecutable(channelDropDownComboBoxes[i].SelectedItem.ToString()));
+                }
+                else
+                {
+                    audioChannels[i].setAudioApplication(new AudioApplication());
+                }
             }
         }
 
