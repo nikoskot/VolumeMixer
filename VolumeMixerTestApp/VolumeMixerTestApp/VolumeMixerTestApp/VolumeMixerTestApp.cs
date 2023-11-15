@@ -31,20 +31,9 @@ namespace VolumeMixerTestApp
 
         // The labels of the channels
         String[] CHANNELS = { "CH1", "CH2", "CH3", "CH4" };
-        String[] CHANNEL_IDS = { "1", "2", "3", "4" };
         const int CHANNELS_NUM = 4;
 
         static SerialPort arduinoPort;
-
-        // The available audio sessions, nore precisely their audio session properties objects
-        static public ArrayList availableAudioSessionsProperties = new ArrayList();
-
-        // The audio sessions that are currently controlled
-        static ArrayList activatedAudioSessions = new ArrayList();
-
-        static String[] channelsToAudioSessionsMappings = {null, null, null, null};
-
-        static float[] channelsToVolumeMappings = { 0, 0, 0, 0 };
 
         // This list holds the currently available running applications/sessions that use audio.
         static List<AudioApplication> availableAudioApplications = new List<AudioApplication>();
@@ -98,40 +87,49 @@ namespace VolumeMixerTestApp
 
             /////////////////////////////////////////////////////////////////////////////////////////
             // Load saved configuration from file
-            //String read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME);
-            //Dictionary<String, String> channelToApp = JsonSerializer.Deserialize<Dictionary<String, String>>(read);
+            String read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME);
+            Dictionary<String, String> channelToApp = JsonSerializer.Deserialize<Dictionary<String, String>>(read);
 
-            //read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME);
-            //Dictionary<String, float> channelToVolume = JsonSerializer.Deserialize<Dictionary<String, float>>(read);
+            read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME);
+            Dictionary<String, float> channelToVolume = JsonSerializer.Deserialize<Dictionary<String, float>>(read);
 
-            //// If loaded configuration is not empty, activate the configuration
-            //if (channelToApp.Count >= 1 && channelToVolume.Count >= 1 && channelToVolume.Count == channelToApp.Count)
-            //{
+            // If loaded configuration is not empty, activate the configuration
+            if (channelToApp.Count >= 1 && channelToVolume.Count >= 1 && channelToVolume.Count == channelToApp.Count)
+            {
 
-            //    // Get the executables of the available audio sessions
-            //    ArrayList availableAudioSessionsExecutables = new ArrayList();
-            //    foreach (AudioSessionControl session in availableAudioSessions)
-            //    {
+                // Get the executables of the available audio sessions
+                //ArrayList availableAudioSessionsExecutables = new ArrayList();
+                //foreach (AudioSessionControl session in availableAudioSessions)
+                //{
 
-            //        AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
-            //        Process proc = session2.Process;
-            //        String executable = proc.MainModule.ModuleName;
+                //    AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
+                //    Process proc = session2.Process;
+                //    String executable = proc.MainModule.ModuleName;
 
-            //        availableAudioSessionsExecutables.Add(executable);
-            //    }
+                //    availableAudioSessionsExecutables.Add(executable);
+                //}
 
-            //    foreach (String channel in CHANNELS)
-            //    {
+                for (int i = 0; i < CHANNELS_NUM; i++) {
 
-            //        String executable = loaded_config[channel].executable;
-            //        float volume = channelToVolume[channel];
+                    String loadedExecutable = channelToApp[CHANNELS[i]];
 
-            //        ///////
+                    float loadedVolume = channelToVolume[CHANNELS[i]];
 
-            //    }
-            //}
+                    foreach (AudioApplication audioApplication in availableAudioApplications) {
+
+                        if (audioApplication.getExecutable() == loadedExecutable) {
+
+                            // set the combobox to show that executable, attach the audio app to the channel, update the volume
+                            // 
+                            audioChannels[i].setAudioApplication(audioApplication);
+                            audioApplication.setVolume(loadedVolume);
+                        }
+                    }
+
+                }
+            }
             /////////////////////////////////////////////////////////////////////////////////////////
-            
+
         }
 
         /// <summary>
@@ -153,17 +151,19 @@ namespace VolumeMixerTestApp
 
                 if (audioChannels[i] != null) {
 
-                    // Add the 
+                    // Add the channels-app-volume pairs to the dictionaries
                     channelToApp.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getExecutable());
 
-                    channelToVolume.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getVolume().MasterVolume);
+                    channelToVolume.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getVolumeValue());
                 }
             }
 
+            // Save the channel-app dictionary
             String json = JsonSerializer.Serialize(channelToApp);
 
             File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME, json);
 
+            // Save the channel-volume dictionary
             json = JsonSerializer.Serialize(channelToVolume);
 
             File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME, json);
