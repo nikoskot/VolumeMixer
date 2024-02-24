@@ -287,7 +287,9 @@ namespace VolumeMixerTestApp
             Console.WriteLine("Clicked apply");
             for (int i = 0; i < CHANNELS_NUM; i++) {
 
-                if (channelDropDownComboBoxes[i].SelectedIndex > 0)
+                Console.WriteLine(channelDropDownComboBoxes[i].SelectedIndex);
+
+                if (channelDropDownComboBoxes[i].SelectedIndex >= 0)
                 {
 
                     audioChannels[i].setAudioApplication(GetAudioApplicationFromExecutable(channelDropDownComboBoxes[i].SelectedItem.ToString()));
@@ -297,6 +299,8 @@ namespace VolumeMixerTestApp
                     audioChannels[i].setAudioApplication(new AudioApplication());
                 }
             }
+
+            Console.WriteLine("Clicked apply exit");
         }
 
         /// <summary>
