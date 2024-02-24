@@ -97,47 +97,47 @@ namespace VolumeMixerTestApp
 
             /////////////////////////////////////////////////////////////////////////////////////////
             // Load saved configuration from file
-            String read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME);
-            Dictionary<String, String> channelToApp = JsonSerializer.Deserialize<Dictionary<String, String>>(read);
+            //String read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME);
+            //Dictionary<String, String> channelToApp = JsonSerializer.Deserialize<Dictionary<String, String>>(read);
 
-            read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME);
-            Dictionary<String, float> channelToVolume = JsonSerializer.Deserialize<Dictionary<String, float>>(read);
+            //read = File.ReadAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME);
+            //Dictionary<String, float> channelToVolume = JsonSerializer.Deserialize<Dictionary<String, float>>(read);
 
-            // If loaded configuration is not empty, activate the configuration
-            if (channelToApp.Count >= 1 && channelToVolume.Count >= 1 && channelToVolume.Count == channelToApp.Count)
-            {
+            //// If loaded configuration is not empty, activate the configuration
+            //if (channelToApp.Count >= 1 && channelToVolume.Count >= 1 && channelToVolume.Count == channelToApp.Count)
+            //{
 
-                // Get the executables of the available audio sessions
-                //ArrayList availableAudioSessionsExecutables = new ArrayList();
-                //foreach (AudioSessionControl session in availableAudioSessions)
-                //{
+            //    // Get the executables of the available audio sessions
+            //    //ArrayList availableAudioSessionsExecutables = new ArrayList();
+            //    //foreach (AudioSessionControl session in availableAudioSessions)
+            //    //{
 
-                //    AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
-                //    Process proc = session2.Process;
-                //    String executable = proc.MainModule.ModuleName;
+            //    //    AudioSessionControl2 session2 = session.QueryInterface<AudioSessionControl2>();
+            //    //    Process proc = session2.Process;
+            //    //    String executable = proc.MainModule.ModuleName;
 
-                //    availableAudioSessionsExecutables.Add(executable);
-                //}
+            //    //    availableAudioSessionsExecutables.Add(executable);
+            //    //}
 
-                for (int i = 0; i < CHANNELS_NUM; i++) {
+            //    for (int i = 0; i < CHANNELS_NUM; i++) {
 
-                    String loadedExecutable = channelToApp[CHANNELS[i]];
+            //        String loadedExecutable = channelToApp[CHANNELS[i]];
 
-                    float loadedVolume = channelToVolume[CHANNELS[i]];
+            //        float loadedVolume = channelToVolume[CHANNELS[i]];
 
-                    foreach (AudioApplication audioApplication in availableAudioApplications) {
+            //        foreach (AudioApplication audioApplication in availableAudioApplications) {
 
-                        if (audioApplication.getExecutable() == loadedExecutable) {
+            //            if (audioApplication.getExecutable() == loadedExecutable) {
 
-                            // set the combobox to show that executable, attach the audio app to the channel, update the volume
-                            // 
-                            audioChannels[i].setAudioApplication(audioApplication);
-                            audioApplication.setVolume(loadedVolume);
-                        }
-                    }
+            //                // set the combobox to show that executable, attach the audio app to the channel, update the volume
+            //                // 
+            //                audioChannels[i].setAudioApplication(audioApplication);
+            //                audioApplication.setVolume(loadedVolume);
+            //            }
+            //        }
 
-                }
-            }
+            //    }
+            //}
             /////////////////////////////////////////////////////////////////////////////////////////
         }
 
@@ -151,31 +151,31 @@ namespace VolumeMixerTestApp
 
             Console.WriteLine("Application closed");
 
-            // Create two dictionaries that will be  saved in two json files
-            Dictionary<String, String> channelToApp = new Dictionary<String, String>();
-            Dictionary<String, float> channelToVolume = new Dictionary<String, float>();
+            //// Create two dictionaries that will be  saved in two json files
+            //Dictionary<String, String> channelToApp = new Dictionary<String, String>();
+            //Dictionary<String, float> channelToVolume = new Dictionary<String, float>();
 
-            // For each aduio channel
-            for (int i = 0; i < CHANNELS_NUM; i++) {
+            //// For each aduio channel
+            //for (int i = 0; i < CHANNELS_NUM; i++) {
 
-                if (audioChannels[i] != null) {
+            //    if (audioChannels[i] != null) {
 
-                    // Add the channels-app-volume pairs to the dictionaries
-                    channelToApp.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getExecutable());
+            //        // Add the channels-app-volume pairs to the dictionaries
+            //        channelToApp.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getExecutable());
 
-                    channelToVolume.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getVolumeValue());
-                }
-            }
+            //        channelToVolume.Add(CHANNELS[i], audioChannels[i].getAudioApplication().getVolumeValue());
+            //    }
+            //}
 
-            // Save the channel-app dictionary
-            String json = JsonSerializer.Serialize(channelToApp);
+            //// Save the channel-app dictionary
+            //String json = JsonSerializer.Serialize(channelToApp);
 
-            File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME, json);
+            //File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_APPS_FILE_NAME, json);
 
-            // Save the channel-volume dictionary
-            json = JsonSerializer.Serialize(channelToVolume);
+            //// Save the channel-volume dictionary
+            //json = JsonSerializer.Serialize(channelToVolume);
 
-            File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME, json);
+            //File.WriteAllText(CURRENT_FOLDER_PATH + SAVED_VOLUMES_FILE_NAME, json);
         }
 
         //private void channel1DropDown_SelectedIndexChanged(object sender, EventArgs e)
@@ -287,8 +287,6 @@ namespace VolumeMixerTestApp
             Console.WriteLine("Clicked apply");
             for (int i = 0; i < CHANNELS_NUM; i++) {
 
-                Console.WriteLine(channelDropDownComboBoxes[i].SelectedIndex);
-
                 if (channelDropDownComboBoxes[i].SelectedIndex >= 0)
                 {
 
@@ -299,8 +297,6 @@ namespace VolumeMixerTestApp
                     audioChannels[i].setAudioApplication(new AudioApplication());
                 }
             }
-
-            Console.WriteLine("Clicked apply exit");
         }
 
         /// <summary>
