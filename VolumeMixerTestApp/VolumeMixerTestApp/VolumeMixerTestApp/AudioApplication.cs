@@ -20,7 +20,7 @@ namespace VolumeMixerTestApp
         SimpleAudioVolume volume;
         AudioEndpointVolume masterVolume;
         Process process;
-        String executable;
+        String processName;
         AudioChannel channel;
 
         // Getters.
@@ -44,7 +44,7 @@ namespace VolumeMixerTestApp
 
         public Process getProcess() { return process; }
 
-        public String getExecutable() { return executable; }
+        public String getProcessName() { return processName; }
 
         public AudioChannel getChannel() { return channel; }
 
@@ -104,11 +104,11 @@ namespace VolumeMixerTestApp
             }
         } 
 
-        public void setExecutable(String executable) {
+        public void setProcessName(String processName) {
 
-            if (executable != null) {
+            if (processName != null) {
 
-                this.executable = executable;
+                this.processName = processName;
             }
         }
 
@@ -127,32 +127,7 @@ namespace VolumeMixerTestApp
             setSession2(session.QueryInterface<AudioSessionControl2>());
             setVolume(session.QueryInterface<SimpleAudioVolume>());
             setProcess(this.session2.Process);
-
-            //try {
-
-            //    // Set up the handler for when the process will be terminated
-            //    this.process.EnableRaisingEvents = true;
-            //    this.process.Exited += (sender, e) => {
-            //        Console.WriteLine("Session Disconnected");
-            //        //VolumeMixerTestApp.GetAvailableAudioApplications();
-            //    };
-            //}
-
-            //catch (Exception ex) { }
-
-            try {
-
-                setExecutable(this.process.MainModule.ModuleName);
-            }
-
-            catch (Exception ex) {
-
-                if (this.process.ProcessName == "Idle") {
-
-                    // Systems sounds (this we will ignore)
-                    setExecutable("system.exe");
-                }
-            }
+            setProcessName(this.process.ProcessName);
         }
 
         // Empty constructor
@@ -161,7 +136,7 @@ namespace VolumeMixerTestApp
             this.session = null;
             this.session2 = null;
             this.process = null;
-            this.executable = null;
+            this.processName = null;
             this.channel = null;
         }
     }

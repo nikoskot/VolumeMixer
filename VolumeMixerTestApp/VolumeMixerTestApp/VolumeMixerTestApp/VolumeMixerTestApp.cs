@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Diagnostics;
 using CSCore.CoreAudioAPI;
 using System.Collections;
 using System.Threading;
 using System.IO.Ports;
 using System.IO;
-using System.Diagnostics.Tracing;
-using System.Text.Json;
-using static System.Collections.Specialized.BitVector32;
 
 namespace VolumeMixerTestApp
 {
@@ -86,10 +77,6 @@ namespace VolumeMixerTestApp
             channelDropDownComboBoxes[2] = channel3DropDown;
             channelDropDownComboBoxes[3] = channel4DropDown;
 
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // Setup notifications-callbacks for when a new audio session is created.
-            //Notifications notifier = new Notifications();
-            //notifier.SetupAudioSessionNotificationCallbacks();
             /////////////////////////////////////////////////////////////////////////////////////////
 
             // Upon initialization get the available audio applications/sessions
@@ -197,7 +184,7 @@ namespace VolumeMixerTestApp
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
+                availableAudioSessionsExecutables.Add(audioApp.getProcessName());
             }
             
             // Add the executables list to the drop down list
@@ -223,7 +210,7 @@ namespace VolumeMixerTestApp
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
+                availableAudioSessionsExecutables.Add(audioApp.getProcessName());
             }
 
             // Add the executables list to the drop down list
@@ -249,7 +236,7 @@ namespace VolumeMixerTestApp
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
+                availableAudioSessionsExecutables.Add(audioApp.getProcessName());
             }
 
             // Add the executables list to the drop down list
@@ -275,7 +262,7 @@ namespace VolumeMixerTestApp
             {
 
                 // Get only the executable and save it to the list
-                availableAudioSessionsExecutables.Add(audioApp.getExecutable());
+                availableAudioSessionsExecutables.Add(audioApp.getProcessName());
             }
 
             // Add the executables list to the drop down list
@@ -290,7 +277,7 @@ namespace VolumeMixerTestApp
                 if (channelDropDownComboBoxes[i].SelectedIndex >= 0)
                 {
 
-                    audioChannels[i].setAudioApplication(GetAudioApplicationFromExecutable(channelDropDownComboBoxes[i].SelectedItem.ToString()));
+                    audioChannels[i].setAudioApplication(GetAudioApplicationFromProcessName(channelDropDownComboBoxes[i].SelectedItem.ToString()));
                 }
                 else
                 {
@@ -336,7 +323,7 @@ namespace VolumeMixerTestApp
             // Add manualy the System Master Volume.
             // Create an Audio Apllication object for the System Master Volume
             AudioApplication masterVolumeApplication = new AudioApplication();
-            masterVolumeApplication.setExecutable("Master Volume");
+            masterVolumeApplication.setProcessName("Master Volume");
             masterVolumeApplication.setVolume(AudioEndpointVolume.FromDevice(device));
 
             // Add it to the list
@@ -348,23 +335,17 @@ namespace VolumeMixerTestApp
                 // Create the corresponding audio application object
                 AudioApplication audioApplication = new AudioApplication(session);
 
-                // If it is not the system.exe and has a valid executable name
-                if (audioApplication.getExecutable() != null & audioApplication.getExecutable() != "system.exe")
-                {
-
-                    // Add it to the list
-                    availableAudioApplications.Add(audioApplication);
-                }    
+                availableAudioApplications.Add(audioApplication);
             }
         }
 
-        static private AudioApplication GetAudioApplicationFromExecutable(string executable) {
+        static private AudioApplication GetAudioApplicationFromProcessName(string processName) {
             AudioApplication audioApp = null;
 
             foreach (AudioApplication audioApplication in availableAudioApplications)
             {
 
-                if (audioApplication.getExecutable() == executable)
+                if (audioApplication.getProcessName() == processName)
                 {
 
                     audioApp = audioApplication;
