@@ -43,7 +43,7 @@ namespace VolumeMixerTestApp
 
                 // Get the available audio sessions and audio session properties and save them to the corresponding list of the main application
                 //VolumeMixerTestApp.availableAudioSessionsProperties = VolumeMixerTestApp.CollectAvailableAudioSessionsProperties();
-                VolumeMixerTestApp.CollectAvailableAudioApplications();
+                //VolumeMixerTestApp.GetAvailableAudioApplications();
                 return 0;
             }
         }

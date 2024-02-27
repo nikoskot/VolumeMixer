@@ -128,17 +128,17 @@ namespace VolumeMixerTestApp
             setVolume(session.QueryInterface<SimpleAudioVolume>());
             setProcess(this.session2.Process);
 
-            try {
+            //try {
 
-                // Set up the handler for when the process will be terminated
-                this.process.EnableRaisingEvents = true;
-                this.process.Exited += (sender, e) => {
-                    Console.WriteLine("Session Disconnected");
-                    VolumeMixerTestApp.CollectAvailableAudioApplications();
-                };
-            }
+            //    // Set up the handler for when the process will be terminated
+            //    this.process.EnableRaisingEvents = true;
+            //    this.process.Exited += (sender, e) => {
+            //        Console.WriteLine("Session Disconnected");
+            //        //VolumeMixerTestApp.GetAvailableAudioApplications();
+            //    };
+            //}
 
-            catch (Exception ex) { }
+            //catch (Exception ex) { }
 
             try {
 

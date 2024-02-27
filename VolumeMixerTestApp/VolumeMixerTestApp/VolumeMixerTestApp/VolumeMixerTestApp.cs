@@ -88,8 +88,8 @@ namespace VolumeMixerTestApp
 
             /////////////////////////////////////////////////////////////////////////////////////////
             // Setup notifications-callbacks for when a new audio session is created.
-            Notifications notifier = new Notifications();
-            notifier.SetupAudioSessionNotificationCallbacks();
+            //Notifications notifier = new Notifications();
+            //notifier.SetupAudioSessionNotificationCallbacks();
             /////////////////////////////////////////////////////////////////////////////////////////
 
             // Upon initialization get the available audio applications/sessions
@@ -302,7 +302,7 @@ namespace VolumeMixerTestApp
         /// <summary>
         /// This method is called when we want to get all the available audio applications/sessions that are currently running is the system.
         /// </summary>
-        public void GetAvailableAudioApplications() {
+        static public void GetAvailableAudioApplications() {
 
             Thread t = new Thread(new ThreadStart(() =>
             {
@@ -395,6 +395,11 @@ namespace VolumeMixerTestApp
 
             // Change the channel volume
             audioChannels[channelNumber - 1].getAudioApplication().setVolume(newVolume);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            GetAvailableAudioApplications();
         }
 
         //private Dictionary<String, ChannelProperties> loadSavedConfig(String filePath)
